@@ -43,7 +43,9 @@ And here's a more complex arrangement with cycles:
 
 ### Crossing Arrows
 
-Not all DiGraphs can be represented without lines crossing. Here's a more complex 
-example showing how lines will sometimes need to cross:
+Not all [DiGraphs](https://en.wikipedia.org/wiki/Directed_graph "Directed Graph on Wikipedia") 
+can be represented without lines crossing. Here's a simple 
+example that cannot be drawn in a way that preserves layers without also including 
+line crossings:
 
 ![Package Dependencies with Crossing Dependencies](etc/samples/PackageGraphWithCrossings.png)
