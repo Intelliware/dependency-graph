@@ -8,8 +8,6 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -19,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-
-import org.apache.commons.lang.SystemUtils;
 
 import ca.intelliware.commons.dependency.DependencyManager;
 import ca.intelliware.commons.dependency.Layer;
@@ -41,28 +37,6 @@ public class Grapher<T> {
 	private Map<Object, Rectangle2D> locations = Collections.synchronizedMap(new HashMap<Object, Rectangle2D>());
 	private Graph graph;
 	private CoordinateSystem coordinateSystem;
-
-	public static void main(String[] args) throws Exception {
-		DependencyManager<String> manager = new DependencyManager<String>();
-		manager.add("pebbles", "fred");
-		manager.add("fred", "mr_slate");
-		manager.add("pebbles", "wilma");
-		manager.add("bam-bam", "barney");
-		manager.add("bam-bam", "betty");
-		manager.add("aliens", "pebbles");
-		manager.add("aliens", "mr_slate");
-		manager.add("aliens", "betty");
-
-		File file = new File(SystemUtils.JAVA_IO_TMPDIR, "temp.png");
-		System.out.println(file.getAbsolutePath());
-		OutputStream output = new FileOutputStream(file);
-		try {
-			Grapher<String> grapher = new Grapher<String>(manager);
-			grapher.createPng(output, 1000, 600);
-		} finally {
-			output.close();
-		}
-	}
 
 	public Grapher(DependencyManager<T> dependencyManager) {
 		this.dependencyManager = dependencyManager;
