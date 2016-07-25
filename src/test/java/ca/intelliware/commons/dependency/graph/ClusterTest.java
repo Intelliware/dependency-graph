@@ -1,26 +1,35 @@
 package ca.intelliware.commons.dependency.graph;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-public class ClusterTest extends TestCase {
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
+
+@RunWith(MockitoJUnitRunner.class)
+public class ClusterTest {
 	
+	@Mock
+	Block block;
+	
+	@Test
 	public void testExcessShift() throws Exception {
-		
-		Block block = new Block(new BlockManager(), 1);
-		block.add(new MockVertex("v1", 0, 0));
-		Cluster cluster = new Cluster(block);
+		Mockito.when(this.block.getWidth()).thenReturn(1.0);
+		Cluster cluster = new Cluster(this.block);
 		cluster.setShift(3.0);
 		
-		assertEquals("excess shift", 2.5, cluster.getExcessShift());
+		assertEquals("excess shift", 2.5, cluster.getExcessShift(), 0.0001);
 	}
 	
+	@Test
 	public void testExcessShiftNegative() throws Exception {
 		
-		Block block = new Block(new BlockManager(), 1);
-		block.add(new MockVertex("v1", 0, 0));
-		Cluster cluster = new Cluster(block);
+		Mockito.when(this.block.getWidth()).thenReturn(1.0);
+		Cluster cluster = new Cluster(this.block);
 		cluster.setShift(-1.0);
 		
-		assertEquals("excess shift", -1.5, cluster.getExcessShift());
+		assertEquals("excess shift", -1.5, cluster.getExcessShift(), 0.0001);
 	}
 }

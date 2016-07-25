@@ -1,13 +1,17 @@
 package ca.intelliware.commons.dependency.graph;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
 import ca.intelliware.commons.dependency.graph.HorizontalCoordinateAssignmentAlgorithm.ConflictType;
 
-public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
+public class HorizontalCoordinateAssignmentAlgorithmTest {
 	
+	@Test
 	public void testEdgeMarking() throws Exception {
 		
 		MockVertex v1 = new MockVertex("v1", 0, 0);
@@ -43,6 +47,7 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 		assertEquals("edge 3", ConflictType.NO_CONFLICT, conflicts.get(edge3));
 	}
 	
+	@Test
 	public void testEdgeMarkingRightward() throws Exception {
 		
 		MockVertex v1 = new MockVertex("v1", 0, 0);
@@ -76,6 +81,7 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 		assertEquals("edge 4", ConflictType.NO_CONFLICT, conflicts.get(edge4));
 	}
 	
+	@Test
 	public void testCoordinateImpl() throws Exception {
 		
 		HorizontalCoordinateImpl coordinate = 
@@ -86,9 +92,10 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 		coordinate.setPosition(5, Bias.LEFTWARD_LOWER);
 		coordinate.setPosition(3, Bias.RIGHTWARD_LOWER);
 		
-		assertEquals("position", 6.0, coordinate.getPosition());
+		assertEquals("position", 6.0, coordinate.getPosition(), 0.0001);
 	}
 	
+	@Test
 	public void testSimpleCase() throws Exception {
 		MockVertex vertex1 = new MockVertex("one", 0, 0);
 		MockVertex vertex2 = new MockVertex("two", 0, 1);
@@ -102,7 +109,7 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 		List<Vertex> vertices = graph.getAllVertices();
 		for (int i = 0; i < vertices.size(); i++) {
 			Vertex vertex = vertices.get(i);
-			assertEquals(vertex.toString(), expected[i], vertex.getHorizontalCoordinate().getPosition());
+			assertEquals(vertex.toString(), expected[i], vertex.getHorizontalCoordinate().getPosition(), 0.0001);
 		}
 	}
 
@@ -113,6 +120,7 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 		return new Edge(v1, v2);
 	}
 
+	@Test
 	public void testTrivial() throws Exception {
 		MockVertex vertex1 = new MockVertex("one", 0, 0);
 		MockVertex vertex2 = new MockVertex("two", 1, 0);
@@ -125,7 +133,7 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 		List<Vertex> vertices = graph.getAllVertices();
 		for (int i = 0; i < vertices.size(); i++) {
 			Vertex vertex = vertices.get(i);
-			assertEquals(vertex.toString(), expected[i], vertex.getHorizontalCoordinate().getPosition());
+			assertEquals(vertex.toString(), expected[i], vertex.getHorizontalCoordinate().getPosition(), 0.0001);
 		}
 	}
 	
@@ -139,6 +147,7 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 	 * Layer 0 :  (1)  (2)  (4)  (5)
 	 * 
 	 */
+	@Test
 	public void testSlightlyLargerSimpleCase() throws Exception {
 		MockVertex v1 = new MockVertex("one", 0, 0);
 		MockVertex v2 = new MockVertex("two", 0, 1);
@@ -156,7 +165,7 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 		List<Vertex> vertices = graph.getAllVertices();
 		for (int i = 0; i < vertices.size(); i++) {
 			Vertex vertex = vertices.get(i);
-			assertEquals(vertex.toString(), expected[i] + 0.5, vertex.getHorizontalCoordinate().getPosition());
+			assertEquals(vertex.toString(), expected[i] + 0.5, vertex.getHorizontalCoordinate().getPosition(),0.0001);
 		}
 	}
 
@@ -165,6 +174,7 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 	 * HorizontalCoordinateAssignmentAlgorithm, but conflicts have been
 	 * removed for simplicity
 	 */
+	@Test
 	public void testCaseRequiringHorizontalCompaction() throws Exception {
 		MockVertex v1 = new MockVertex("1", 0, 0);
 		MockVertex v2 = new MockVertex("2", 0, 1);
@@ -225,7 +235,7 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 		List<Vertex> vertices = graph.getAllVertices();
 		for (int i = 0; i < vertices.size(); i++) {
 			Vertex vertex = vertices.get(i);
-			assertEquals(vertex.toString(), expected[i] + 0.5, vertex.getHorizontalCoordinate().getPosition());
+			assertEquals(vertex.toString(), expected[i] + 0.5, vertex.getHorizontalCoordinate().getPosition(), 0.0001);
 		}
 	}
 
@@ -239,6 +249,7 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 	 * Layer 0 :  (1)  (2)  (4)  (5)
 	 * 
 	 */
+	@Test
 	public void testCaseWithType0Conflicts() throws Exception {
 		MockVertex v1 = new MockVertex("one", 0, 0);
 		MockVertex v2 = new MockVertex("two", 0, 1);
@@ -257,10 +268,11 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 		List<Vertex> vertices = graph.getAllVertices();
 		for (int i = 0; i < vertices.size(); i++) {
 			Vertex vertex = vertices.get(i);
-			assertEquals(vertex.toString(), expected[i] +0.5, vertex.getHorizontalCoordinate().getPosition());
+			assertEquals(vertex.toString(), expected[i] +0.5, vertex.getHorizontalCoordinate().getPosition(), 0.0001);
 		}
 	}
 	
+	@Test
 	public void testCaseWithType1Conflicts() throws Exception {
 		MockVertex v1 = new MockVertex("one", 0, 0);
 		MockVertex v2 = new MockVertex("two", 0, 1);
@@ -285,11 +297,10 @@ public class HorizontalCoordinateAssignmentAlgorithmTest extends TestCase {
 		new HorizontalCoordinateAssignmentAlgorithm().process(graph);
 		
 		List<Vertex> vertices = graph.getAllVertices();
-		assertEquals("inner segment", v3a.getX(), v5.getX());
+		assertEquals("inner segment", v3a.getX(), v5.getX(), 0.0001);
 		for (int i = 0; i < vertices.size(); i++) {
 			Vertex vertex = vertices.get(i);
 			System.out.println(vertex.toString() + " " + vertex.getHorizontalCoordinate().getPosition());
 		}
 	}
-	
 }

@@ -1,13 +1,20 @@
 package ca.intelliware.commons.dependency.graph;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Test;
 
 import junit.framework.TestCase;
 import ca.intelliware.commons.dependency.DependencyManager;
 
-public class GraphTest extends TestCase {
+public class GraphTest {
 
+	@Test
 	public void testOrderLayer() throws Exception {
 		Graph graph = Graph.createGraph(createDependencies());
 		GraphLayer layer = graph.getTop();
@@ -17,6 +24,7 @@ public class GraphTest extends TestCase {
 		assertOrdinal("ordinals", 2, layer.getVertices());
 	}
 
+	@Test
 	public void testGetNeighboursInLowerLayer() throws Exception {
 		Graph graph = Graph.createGraph(createDependencies());
 		Vertex vertex = getVertex(graph, "fred");
@@ -28,6 +36,7 @@ public class GraphTest extends TestCase {
 		assertEquals("neighbour: " + neighbours, "mr_slate", ((Graph.BasicVertex) neighbours.get(0)).getNode().getItem());
 	}
 
+	@Test
 	public void testGetDummyNeighboursInUpperLayer() throws Exception {
 		Graph graph = Graph.createGraph(createDependencies());
 		Vertex vertex = getVertex(graph, "wilma");
@@ -39,6 +48,7 @@ public class GraphTest extends TestCase {
 		assertTrue("vertex type", neighbours.get(0) instanceof DummyVertex);
 	}
 
+	@Test
 	public void testNoNeighboursInUpperLayer() throws Exception {
 		Graph graph = Graph.createGraph(createDependencies());
 		Vertex vertex = getVertex(graph, "bam-bam");
@@ -49,6 +59,7 @@ public class GraphTest extends TestCase {
 		assertEquals("number of neighbours", 0, neighbours.size());
 	}
 
+	@Test
 	public void testGetNeighboursInUpperLayer() throws Exception {
 		Graph graph = Graph.createGraph(createDependencies());
 		Vertex vertex = getVertex(graph, "fred");

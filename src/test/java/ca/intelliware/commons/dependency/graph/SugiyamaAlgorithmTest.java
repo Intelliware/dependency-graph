@@ -1,10 +1,15 @@
 package ca.intelliware.commons.dependency.graph;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.Test;
+
 import ca.intelliware.commons.dependency.DependencyManager;
 
-public class SugiyamaAlgorithmTest extends TestCase {
+public class SugiyamaAlgorithmTest {
 
+	@Test
 	public void testExampleWithSimpleLayout() throws Exception {
 		DependencyManager<String> manager = createDependencies();
 		Graph graph = new SugiyamaAlgorithm().apply(manager);
@@ -12,6 +17,7 @@ public class SugiyamaAlgorithmTest extends TestCase {
 		assertEquals("number of layers", 3, graph.getLayers().size());
 	}
 
+	@Test
 	public void testLayers() throws Exception {
 		DependencyManager<String> manager = createDependencies();
 		Graph graph = new SugiyamaAlgorithm().apply(manager);

@@ -1,13 +1,15 @@
 package ca.intelliware.commons.dependency.graph;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class CountCrossingAlgorithmTest extends TestCase {
+public class CountCrossingAlgorithmTest {
 	
 	final class OrderedImpl implements Ordered {
 		private final int value;
@@ -48,6 +50,7 @@ public class CountCrossingAlgorithmTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testCountCrossings() throws Exception {
 		
 		OrderedLayer<Cluster> layer1 = new OrderedLayer<Cluster>(0, new TreeSet<Cluster>(Arrays.asList(
@@ -62,6 +65,7 @@ public class CountCrossingAlgorithmTest extends TestCase {
 		assertEquals("count", 12, new CountCrossingAlgorithm().countCrossings(layer1, layer2));
 	}
 
+	@Test
 	public void testCountCrossingsTrivialCase() throws Exception {
 		
 		OrderedLayer<Cluster> layer1 = new OrderedLayer<Cluster>(0, new TreeSet<Cluster>(Arrays.asList(
@@ -72,6 +76,7 @@ public class CountCrossingAlgorithmTest extends TestCase {
 		assertEquals("count", 0, new CountCrossingAlgorithm().countCrossings(layer1, layer2));
 	}
 	
+	@Test
 	public void testCountCrossingsWithGaps() throws Exception {
 		
 		OrderedLayer<Cluster> layer1 = new OrderedLayer<Cluster>(0, new TreeSet<Cluster>(Arrays.asList(
