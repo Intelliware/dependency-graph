@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import junit.framework.TestCase;
 import ca.intelliware.commons.dependency.DependencyManager;
 
 public class GraphTest {
