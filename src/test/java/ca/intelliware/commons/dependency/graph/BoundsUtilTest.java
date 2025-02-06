@@ -8,8 +8,6 @@ import java.awt.geom.Rectangle2D;
 
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
 public class BoundsUtilTest {
 
 	@Test

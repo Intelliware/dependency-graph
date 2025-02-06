@@ -12,14 +12,13 @@ import ca.intelliware.commons.dependency.DependencyManager;
 import ca.intelliware.commons.dependency.Layer;
 import ca.intelliware.commons.dependency.Node;
 
-@SuppressWarnings("unchecked")
 class Graph implements SugiyamaGraph {
 
 	class BasicVertex extends Vertex {
 
-		private final Node node;
+		private final Node<?> node;
 
-		BasicVertex(int layer, Node node) {
+		BasicVertex(int layer, Node<?> node) {
 			super(layer);
 			this.node = node;
 		}
@@ -57,7 +56,7 @@ class Graph implements SugiyamaGraph {
 					&& this.node.getEfferentCouplings().contains(vertex.node.getItem());
 		}
 
-		Node getNode() {
+		Node<?> getNode() {
 			return this.node;
 		}
 	}
@@ -82,13 +81,13 @@ class Graph implements SugiyamaGraph {
 	}
 
 
-	static Graph createGraph(DependencyManager dependencyManager) {
+	static <T> Graph createGraph(DependencyManager<T> dependencyManager) {
 		Map<Object,Vertex> map = new HashMap<Object, Vertex>();
 		Graph graph = new Graph();
-		List<Layer<Node>> nodeLayers = dependencyManager.getNodeLayers();
+		List<Layer<Node<T>>> nodeLayers = dependencyManager.getNodeLayers();
 		for (int i = 0, length = nodeLayers == null ? 0 : nodeLayers.size(); i < length; i++) {
-			Layer<Node> layer = nodeLayers.get(i);
-			for (Node node : layer.getContents()) {
+			Layer<Node<T>> layer = nodeLayers.get(i);
+			for (Node<T> node : layer.getContents()) {
 				BasicVertex vertex = graph.new BasicVertex(i, node);
 				graph.add(vertex);
 
@@ -96,8 +95,8 @@ class Graph implements SugiyamaGraph {
 			}
 		}
 		
-		for (Layer<Node> layer : nodeLayers) {
-			for (Node node : layer.getContents()) {
+		for (Layer<Node<T>> layer : nodeLayers) {
+			for (Node<T> node : layer.getContents()) {
 				Vertex vertex = map.get(node.getItem());
 				createDummyVertices(map, node, vertex, graph);
 			}
@@ -112,7 +111,7 @@ class Graph implements SugiyamaGraph {
 		this.vertices.get(vertex.getLayer()).add(vertex);
 	}
 
-	private static void createDummyVertices(Map<Object, Vertex> map, Node node, Vertex top, Graph graph) {
+	private static <T> void createDummyVertices(Map<Object, Vertex> map, Node<T> node, Vertex top, Graph graph) {
 		for (Object dependency : node.getEfferentCouplings()) {
 			Vertex bottom = map.get(dependency);
 			if (node.getLayer() - bottom.getLayer() > 1) {

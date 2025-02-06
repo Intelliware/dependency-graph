@@ -3,6 +3,7 @@ package ca.intelliware.commons.dependency.graph;
 import static ca.intelliware.commons.dependency.graph.CoordinateSystem.HEIGHT_SCALE_FACTOR;
 import static ca.intelliware.commons.dependency.graph.CoordinateSystem.WIDTH_SCALE_FACTOR;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
@@ -51,6 +52,14 @@ public class Grapher<T> {
 		this.shape.setPlot(this.plot);
 		this.arrowShape.setPlot(this.plot);
 		this.graph = new SugiyamaAlgorithm().apply(this.dependencyManager);
+	}
+	
+	public void setStripeColour(Color color) {
+		this.plot.setLayerAlternatingColor(color);
+	}
+	
+	public Color getStripeColour() {
+		return this.plot.getLayerAlternatingColor();
 	}
 	
 	private synchronized void draw(Graphics2D graphics, Rectangle2D rectangle, double scale) {
@@ -122,7 +131,7 @@ public class Grapher<T> {
 
 	private void drawArrow(Graphics2D graphics, Vertex vertex, Vertex dependency) {
 		if (!dependency.isDummy() && !vertex.isDummy()) {
-			Node<T> node = ((Graph.BasicVertex) vertex).getNode();
+			Node<?> node = ((Graph.BasicVertex) vertex).getNode();
 			Object object = ((Graph.BasicVertex) dependency).getNode().getItem();
 			Arrow line = BoundsUtil.getEndPoints(getBounds(node.getItem()), getBounds(object));
 			this.arrowShape.drawArrow(graphics, line);
@@ -216,7 +225,7 @@ public class Grapher<T> {
 		for (Vertex vertex : layer.getOrderedContents()) {
 			this.coordinateSystem.getCenterX(vertex);
 			if (!vertex.isDummy()) {
-				Node<T> node = ((Graph.BasicVertex) vertex).getNode();
+				Node<?> node = ((Graph.BasicVertex) vertex).getNode();
 				Graphics2D g = (Graphics2D) graphics.create();
 				double x = this.coordinateSystem.getLeftX(vertex);
 				double y = this.coordinateSystem.getTopY(vertex);
@@ -230,8 +239,8 @@ public class Grapher<T> {
 		}
 	}
 
-	private void drawNode(Graphics2D graphics, Node<T> node) {
-		this.shape.draw(graphics, node);
+	private void drawNode(Graphics2D graphics, Node<?> node) {
+		this.shape.draw(graphics, (Node<T>) node);
 	}
 
 	private void drawLayerBars(Graphics2D graphics, Rectangle2D r) {
