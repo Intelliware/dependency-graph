@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import ca.intelliware.commons.dependency.Coupling;
 import ca.intelliware.commons.dependency.DependencyManager;
 import ca.intelliware.commons.dependency.LayeredGraph;
 import ca.intelliware.commons.dependency.Node;
@@ -121,13 +122,13 @@ class HorizontalCoordinateAssignmentAlgorithm {
 		for (Node<Block> node : layeredGraph.getNodes()) {
 			Block block = node.getItem();
 			if (block.getCluster() == cluster) {
-				for (Block afferent : node.getAfferentCouplings()) {
-					if (afferent.getCluster() == cluster) {
+				for (Coupling<Block> afferent : node.getAfferentCouplings()) {
+					if (afferent.getItem().getCluster() == cluster) {
 						// ignore it
-					} else if (afferent.getCluster().isAssigned()) {
+					} else if (afferent.getItem().getCluster().isAssigned()) {
 						shift = Math.min(shift, 
-								afferent.getHorizontalCoordinate() 
-									- block.getRelativeHorizontalCoordinate() - Block.minimumDistance(afferent, block));
+								afferent.getItem().getHorizontalCoordinate() 
+									- block.getRelativeHorizontalCoordinate() - Block.minimumDistance(afferent.getItem(), block));
 					} else {
 						throw new RuntimeException("Warning!  Expected cluster to be assigned a shift value");
 					}
@@ -150,9 +151,9 @@ class HorizontalCoordinateAssignmentAlgorithm {
 			Block block = node.getItem();
 			if (block.getCluster() == cluster) {
 				dependencyManager.add(block);
-				for (Block afferent : node.getAfferentCouplings()) {
-					if (afferent.getCluster() == cluster) {
-						dependencyManager.add(afferent, block);
+				for (Coupling<Block> afferent : node.getAfferentCouplings()) {
+					if (afferent.getItem().getCluster() == cluster) {
+						dependencyManager.add(afferent.getItem(), block);
 					}						
 				}
 			}
@@ -175,8 +176,8 @@ class HorizontalCoordinateAssignmentAlgorithm {
 				block.assignCluster(cluster);
 				clusters.add(cluster);
 			} else {
-				for (Block efferent : node.getEfferentCouplings()) {
-					block.assignCluster(efferent.getCluster());
+				for (Coupling<Block> efferent : node.getEfferentCouplings()) {
+					block.assignCluster(efferent.getItem().getCluster());
 				}
 			}
 		}
