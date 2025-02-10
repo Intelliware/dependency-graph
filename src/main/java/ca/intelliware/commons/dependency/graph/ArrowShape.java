@@ -5,6 +5,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
 
 class ArrowShape {
@@ -19,16 +20,31 @@ class ArrowShape {
 		} else {
 			graphics.setColor(this.plot.getArrowColor());
 		}
-		graphics.setStroke(this.plot.getArrowStroke());
+		Stroke stroke = this.plot.getArrowStroke();
+		if (stroke instanceof BasicStroke) {
+			BasicStroke basicStroke = (BasicStroke) stroke;
+			stroke = new BasicStroke(basicStroke.getLineWidth() * arrow.getWidth(), basicStroke.getEndCap(), 
+					basicStroke.getLineJoin(), basicStroke.getMiterLimit(), adjustDashes(basicStroke.getDashArray(), arrow.getWidth()), basicStroke.getDashPhase());
+		}
+		graphics.setStroke(stroke);
 		graphics.draw(arrow.toShape());
 		
 		drawArrowHead(graphics, arrow);
 	}
 
+	private float[] adjustDashes(float[] dashArray, float width) {
+		float[] result = new float[dashArray.length];
+		for (int i = 0; i < dashArray.length; i++) {
+			result[i] = dashArray[i] * width;
+		}
+		return result;
+	}
+
 	protected void drawArrowHead(Graphics2D graphics, Arrow arrow) {
 		graphics = (Graphics2D) graphics.create();
 		try {
-			graphics.setStroke(new BasicStroke());
+			BasicStroke stroke = new BasicStroke();
+			graphics.setStroke(new BasicStroke(stroke.getLineWidth() * arrow.getWidth()));
 			graphics.translate(arrow.getLastPoint().getX(), arrow.getLastPoint().getY());
 			
 			graphics.rotate(arrow.getAngleOfLastSegment());

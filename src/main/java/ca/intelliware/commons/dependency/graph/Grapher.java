@@ -16,9 +16,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import ca.intelliware.commons.dependency.Coupling;
 import ca.intelliware.commons.dependency.DependencyManager;
 import ca.intelliware.commons.dependency.Layer;
 import ca.intelliware.commons.dependency.Node;
@@ -38,6 +41,7 @@ public class Grapher<T> {
 	private Map<Object, Rectangle2D> locations = Collections.synchronizedMap(new HashMap<Object, Rectangle2D>());
 	private Graph graph;
 	private CoordinateSystem coordinateSystem;
+	private int maxWeight = 0;
 
 	public Grapher(DependencyManager<T> dependencyManager) {
 		this.dependencyManager = dependencyManager;
@@ -52,6 +56,14 @@ public class Grapher<T> {
 		this.shape.setPlot(this.plot);
 		this.arrowShape.setPlot(this.plot);
 		this.graph = new SugiyamaAlgorithm().apply(this.dependencyManager);
+		this.maxWeight = 0;
+		for (Layer<Node<T>> layer : this.dependencyManager.getLayeredGraph().getLayers()) {
+			for (Node<T> node : layer.getContents()) {
+				for (Coupling<T> efferent : node.getEfferentCouplings()) {
+					this.maxWeight = Math.max(this.maxWeight, efferent.getWeight());
+				}
+			}
+		}
 	}
 	
 	public void setStripeColour(Color color) {
@@ -131,9 +143,17 @@ public class Grapher<T> {
 
 	private void drawArrow(Graphics2D graphics, Vertex vertex, Vertex dependency) {
 		if (!dependency.isDummy() && !vertex.isDummy()) {
-			Node<?> node = ((Graph.BasicVertex) vertex).getNode();
+			Node<T> node = (Node<T>) ((Graph.BasicVertex) vertex).getNode();
 			Object object = ((Graph.BasicVertex) dependency).getNode().getItem();
+			int weight = determineWeight(node, object);
+			
+			float width = 1.0f;
+			if (this.maxWeight > 1) {
+				width = (float) (1 + 4 * (Math.sqrt(weight) / (Math.sqrt(this.maxWeight) - 1)));
+			}
+			
 			Arrow line = BoundsUtil.getEndPoints(getBounds(node.getItem()), getBounds(object));
+			line.setWidth(width);
 			this.arrowShape.drawArrow(graphics, line);
 			if (((BasicVertex) vertex).isBidirectionalWith((BasicVertex) dependency)) {
 				Point2D to = getBoundsCenter(node.getItem(), 0.05 * this.shape.getWidth());
@@ -148,6 +168,12 @@ public class Grapher<T> {
 		} else if (!vertex.isDummy() && dependency.isDummy()) {
 			this.arrowShape.drawArrow(graphics, getArrow(dependency));
 		}
+	}
+
+	private int determineWeight(Node<T> node, Object object) {
+		Set<Coupling<T>> dependencies = this.dependencyManager.getDirectDependencies(node.getItem());
+		List<Coupling<T>> list = dependencies.stream().filter(c -> c.getItem().equals(object)).collect(Collectors.toList());
+		return list.isEmpty() ? 1 : list.get(0).getWeight();
 	}
 
 	private Point2D getBoundsCenter(Object item, double offset) {

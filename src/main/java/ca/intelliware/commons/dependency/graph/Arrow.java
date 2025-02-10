@@ -16,9 +16,15 @@ class Arrow {
 	private static final double NINETY_DEGREES_IN_RADIANS = PI / 2.0;
 	private static final double ONE_EIGHTY_DEGREES_IN_RADIANS = PI;
 	private List<Point2D> points;
+	private float width;
 	
 	Arrow(List<Point2D> points) {
+		this(points, 1.0f);
+	}
+
+	Arrow(List<Point2D> points, float width) {
 		this.points = points;
+		this.width = width;
 	}
 
 	List<Point2D> getPoints() {
@@ -121,5 +127,13 @@ class Arrow {
 		List<Point2D> points = new ArrayList<Point2D>(this.points.subList(1, this.points.size()));
 		points.add(0, to);
 		return new Arrow(points);
+	}
+
+	public float getWidth() {
+		return this.width;
+	}
+
+	public void setWidth(float width) {
+		this.width = width;
 	}
 }
