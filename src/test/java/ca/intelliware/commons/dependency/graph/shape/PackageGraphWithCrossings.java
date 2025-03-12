@@ -26,13 +26,18 @@ public class PackageGraphWithCrossings {
 
 		File file = new File(SystemUtils.JAVA_IO_TMPDIR, "PackageGraphWithCrossings.png");
 		System.out.println(file.getAbsolutePath());
-		OutputStream output = new FileOutputStream(file);
-		try {
+		try (OutputStream output = new FileOutputStream(file)) {
 			Grapher<String> grapher = new Grapher<String>(manager);
 			grapher.setShape(new BigPackageShape<String>());
 			grapher.createPng(output);
-		} finally {
-			output.close();
+		}
+		
+		File svg = new File(SystemUtils.JAVA_IO_TMPDIR, "PackageGraphWithCrossings.svg");
+		System.out.println(svg.getAbsolutePath());
+		try (OutputStream outputSvg = new FileOutputStream(svg)) {
+			Grapher<String> grapher = new Grapher<String>(manager);
+			grapher.setShape(new BigPackageShape<String>());
+			grapher.createSvg(outputSvg);
 		}
 	}
 }

@@ -8,7 +8,11 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 import ca.intelliware.commons.dependency.Node;
 
@@ -34,6 +38,20 @@ public class NodeShape<T> {
 		this.dimension = dimension;
 	}
 
+	protected void drawSvg(Node<T> node, Point2D upperLeft, OutputStream outputStream) throws IOException {
+		
+		String shadowFill = HtmlColor.asHtml(getPlot().getShadowColor());
+		String shapeFill = HtmlColor.asHtml(getPlot().getShapeFillColor());
+		String shapeStroke = HtmlColor.asHtml(getPlot().getShapeLineColor());
+		
+		outputStream.write(("<rect x=\"" + (upperLeft.getX() + 3) + "\" y=\"" + (upperLeft.getY() + 3) + "\" height=\"" 
+				+ this.dimension.getHeight() + "\" width=\"" + this.dimension.getWidth() + "\" fill=\"" + shadowFill + "\" />").getBytes("UTF-8"));
+		
+		outputStream.write(("<rect x=\"" + (upperLeft.getX()) + "\" y=\"" + (upperLeft.getY()) + "\" height=\"" 
+				+ this.dimension.getHeight() + "\" width=\"" + this.dimension.getWidth() + "\" fill=\"" 
+				+ shapeFill + "\" stroke=\"" + shapeStroke + "\" stroke-width=\"1\"  />").getBytes("UTF-8"));
+	}
+	
 	protected void draw(Graphics2D graphics, Node<T> node) {
 		graphics.setPaint(getPlot().getShadowColor());
 		graphics.fill(new Rectangle2D.Float(3, 3, this.dimension.width, this.dimension.height));
@@ -80,6 +98,15 @@ public class NodeShape<T> {
 		graphics.drawString(text, (float) x, (float) y);
 	}
 
+	protected void drawStringSvg(String text, double x, double y, OutputStream output) throws IOException {
+		String fontName = this.font.getFamily();
+		float size = this.font.getSize2D();
+		
+		output.write(("<text x=\"" + x + "\" y=\"" + y + "\" text-anchor=\"middle\" font-size=\"" + size +"\" font-family=\"" + fontName + "\">" 
+				+ StringEscapeUtils.escapeXml(text) 
+				+ "</text>").getBytes("UTF-8"));
+	}
+
 	public double getHeight() {
 		return this.dimension.getHeight();
 	}
@@ -105,7 +132,8 @@ public class NodeShape<T> {
 	 * @param nodes
 	 */
 	public void initialize(Graphics2D graphics, List<Node<T>> nodes) {
-		FontMetrics metrics = graphics.getFontMetrics();
+		Font font = new Font("Helvetica", Font.PLAIN, 10);
+		FontMetrics metrics = graphics.getFontMetrics(font);
 		double width = 1.0;
 		for (Node<T> node : nodes) {
 			Rectangle2D bounds = metrics.getStringBounds(node.getName(), graphics);
@@ -114,7 +142,6 @@ public class NodeShape<T> {
 		
 		double ratio = Math.max(1.0, width / getTextAreaWidth());
 		
-		Font font = graphics.getFont();
 		AffineTransform transform = new AffineTransform();
 		transform.scale(1.00 / ratio, 1.0 / ratio);
 		this.font = font.deriveFont(transform);

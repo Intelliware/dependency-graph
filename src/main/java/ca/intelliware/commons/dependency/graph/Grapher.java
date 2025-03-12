@@ -94,6 +94,26 @@ public class Grapher<T> {
 		drawBoxes(graphics);
 		drawArrows(graphics);
 	}
+	
+	private synchronized void drawSvg(Dimension dimension, OutputStream output) throws IOException {
+		BufferedImage image = new BufferedImage(
+				(int) Math.ceil(this.shape.getDimension().getWidth()), (int) Math.ceil(this.shape.getDimension().getHeight()), 
+				BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2 = image.createGraphics();
+
+		this.shape.initialize(g2, this.dependencyManager.getLayeredGraph().getNodes());
+		drawLayerBarsSvg(dimension, output);
+		
+		this.coordinateSystem = new CoordinateSystem(this.shape, this.graph.getHeight());
+		double excessWidth = dimension.getWidth() - this.coordinateSystem.getWidth(this.graph.getWidth());
+		double excessHeight = dimension.getHeight() - this.coordinateSystem.getTotalHeight();
+		
+		output.write(("<g transform=\"translate(" + (excessWidth / 2.0) + "," + excessHeight + ")\" >").getBytes("UTF-8"));
+		
+		drawBoxesSvg(output);
+		
+		output.write("</g>".getBytes("UTF-8"));
+	}
 
 	private Rectangle2D scale(double scale, Rectangle2D rectangle) {
 		return new Rectangle2D.Double(rectangle.getX(), rectangle.getY(),
@@ -247,6 +267,13 @@ public class Grapher<T> {
 		}
 	}
 
+	private void drawBoxesSvg(OutputStream output) throws IOException {
+		List<GraphLayer> layers = this.graph.getLayers();
+		for (int i = 0, length = layers.size() ; i < length; i++) {
+			drawLayerSvg(i, layers.get(i), output);
+		}
+	}
+	
 	private void drawLayer(Graphics2D graphics, int layerNumber, GraphLayer layer) {
 		for (Vertex vertex : layer.getOrderedContents()) {
 			this.coordinateSystem.getCenterX(vertex);
@@ -265,6 +292,23 @@ public class Grapher<T> {
 		}
 	}
 
+	private void drawLayerSvg(int layerNumber, GraphLayer layer, OutputStream output) throws IOException {
+		for (Vertex vertex : layer.getOrderedContents()) {
+			this.coordinateSystem.getCenterX(vertex);
+			if (!vertex.isDummy()) {
+				Node<?> node = ((Graph.BasicVertex) vertex).getNode();
+				double x = this.coordinateSystem.getLeftX(vertex);
+				double y = this.coordinateSystem.getTopY(vertex);
+				Point2D.Double upperLeft = new Point2D.Double(x, y);
+				drawNodeSvg(node, upperLeft, output);
+			}
+		}
+	}
+
+	private void drawNodeSvg(Node<?> node, Point2D.Double upperLeft, OutputStream output) throws IOException {
+		this.shape.drawSvg((Node<T>) node, upperLeft, output);
+	}
+
 	private void drawNode(Graphics2D graphics, Node<?> node) {
 		this.shape.draw(graphics, (Node<T>) node);
 	}
@@ -276,6 +320,14 @@ public class Grapher<T> {
 			graphics.setPaint(alternate ? this.plot.getLayerBackgroundColor() : this.plot.getLayerAlternatingColor());
 			graphics.fill(new Rectangle2D.Double(r.getX(), i, r.getWidth(), height));
 			alternate = !alternate;
+		}
+	}
+	
+	private void drawLayerBarsSvg(Dimension dimension, OutputStream output) throws IOException {
+		double height = getLayerBandHeight();
+		String fill = HtmlColor.asHtml(getStripeColour());
+		for (int i = 1; (i * height) <= dimension.getHeight(); i += 2) {
+			output.write(("<rect x=\"0\" y=\"" + i * height + "\" width=\"" + dimension.getWidth() + "\" height=\"" + height + "\" fill=\"" + fill + "\" />").getBytes("UTF-8"));
 		}
 	}
 
@@ -303,6 +355,22 @@ public class Grapher<T> {
 			}
 		};
 		ImageIO.write(createBufferedImage(dimension, drawer), "png", output);
+		return dimension;
+	}
+
+	public synchronized Dimension createSvg(OutputStream output) throws IOException {
+		initialize();
+		final Dimension dimension = getPreferredDimension();
+		
+		output.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>".getBytes("UTF-8"));
+		output.write(("<svg width=\"" + dimension.getWidth() + "\" height=\"" + dimension.getHeight() +  "\" viewBox=\"0 0 " 
+				+ dimension.getWidth() + " " + dimension.getHeight() 
+				+ "\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">").getBytes("UTF-8"));
+		output.write("<g>".getBytes("UTF-8"));
+		drawSvg(dimension, output);
+		output.write("</g>".getBytes("UTF-8"));
+		output.write("</svg>".getBytes("UTF-8"));
+		
 		return dimension;
 	}
 

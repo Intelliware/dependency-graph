@@ -82,7 +82,8 @@ public class PackageShape<T> extends NodeShape<T> {
 	public void initialize(Graphics2D graphics, List<Node<T>> nodes) {
 		this.prefix = getPackageNamePrefix(nodes);
 		
-		FontMetrics metrics = graphics.getFontMetrics();
+		Font font = new Font("Helvetica", Font.PLAIN, 10);
+		FontMetrics metrics = graphics.getFontMetrics(font);
 		Rectangle2D bounds = metrics.getStringBounds(this.prefix.toString() + ".", graphics);
 		double width = bounds.getWidth();
 		for (Node<T> node : nodes) {
@@ -93,7 +94,6 @@ public class PackageShape<T> extends NodeShape<T> {
 		
 		double ratio = Math.max(1.0, width / getTextAreaWidth());
 		
-		Font font = graphics.getFont();
 		AffineTransform transform = new AffineTransform();
 		transform.scale(1.00 / ratio, 1.0 / ratio);
 		setFont(font.deriveFont(transform));
