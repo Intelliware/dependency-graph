@@ -50,6 +50,9 @@ public class NodeShape<T> {
 		outputStream.write(("<rect x=\"" + (upperLeft.getX()) + "\" y=\"" + (upperLeft.getY()) + "\" height=\"" 
 				+ this.dimension.getHeight() + "\" width=\"" + this.dimension.getWidth() + "\" fill=\"" 
 				+ shapeFill + "\" stroke=\"" + shapeStroke + "\" stroke-width=\"1\"  />").getBytes("UTF-8"));
+		
+		this.drawStringSvg(node.getName(), getWidth() / 2.0 + upperLeft.getX(), getHeight() / 2.0 + upperLeft.getY(), outputStream);
+
 	}
 	
 	protected void draw(Graphics2D graphics, Node<T> node) {

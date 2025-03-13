@@ -7,6 +7,9 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.io.OutputStream;
 
 class ArrowShape {
 	
@@ -65,5 +68,32 @@ class ArrowShape {
 
 	public void setPlot(Plot plot) {
 		this.plot = plot;
+	}
+
+	public void drawArrowSvg(OutputStream output, Arrow arrow) throws IOException {
+		/*
+		 * <marker xmlns="http://www.w3.org/2000/svg" style="overflow:visible" id="ArrowWide" refX="0" refY="0" orient="auto-start-reverse" inkscape:stockid="Wide arrow" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" inkscape:isstock="true" inkscape:collect="always" preserveAspectRatio="xMidYMid"><path style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:butt" d="M 3,-3 0,0 3,3" transform="rotate(180,0.125,0)" sodipodi:nodetypes="ccc" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" id="path3"/></marker>
+		 */
+		
+		
+		String strokeColour = HtmlColor.asHtml(this.plot.getArrowColor());
+		if (arrow.isPointingUpward()) {
+			strokeColour = HtmlColor.asHtml(this.plot.getReverseArrowColor());
+		}
+
+		String instruction = "M ";
+		String path = "";
+		for (Point2D p : arrow.getPoints()) {
+			path += instruction + p.getX() + " " + p.getY() + " ";
+			instruction = "L ";
+		}
+		output.write(("<marker style=\"overflow:visible\" id=\"ArrowWide-" + path.hashCode() 
+			+ "\" refX=\"0\" refY=\"0\" orient=\"auto-start-reverse\" markerWidth=\"1\" markerHeight=\"1\" viewBox=\"0 0 1 1\" "
+			+ "preserveAspectRatio=\"xMidYMid\">").getBytes("UTF-8"));
+		output.write(("<path style=\"fill:none;stroke:context-stroke;stroke-width:" + arrow.getWidth() 
+			+ ";stroke-linecap:butt\" d=\"M 5,-5 0,0 5,5\" transform=\"rotate(180,0.125,0)\" />").getBytes("UTF-8"));
+		output.write(("</marker>").getBytes("UTF-8"));
+		output.write(("<path d=\"" + path +  "\" stroke-width=\"" + arrow.getWidth() + "\" stroke=\"" 
+				+ strokeColour + "\" fill=\"none\" stroke-dasharray=\"8 5\" marker-end=\"url(#ArrowWide-" + path.hashCode() + "\" />").getBytes());
 	}
 }

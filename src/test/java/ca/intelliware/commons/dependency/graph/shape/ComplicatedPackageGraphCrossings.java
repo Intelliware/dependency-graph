@@ -289,7 +289,7 @@ public class ComplicatedPackageGraphCrossings {
 		System.out.println(svg.getAbsolutePath());
 		try (OutputStream outputSvg = new FileOutputStream(svg)) {
 			Grapher<String> grapher = new Grapher<String>(manager);
-			grapher.setShape(new BigPackageShape<String>());
+			grapher.setShape(new PackageShape<String>());
 			grapher.createSvg(outputSvg);
 		}
 

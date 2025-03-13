@@ -97,11 +97,13 @@ public class Grapher<T> {
 	
 	private synchronized void drawSvg(Dimension dimension, OutputStream output) throws IOException {
 		BufferedImage image = new BufferedImage(
-				(int) Math.ceil(this.shape.getDimension().getWidth()), (int) Math.ceil(this.shape.getDimension().getHeight()), 
+				(int) Math.ceil(this.shape.getDimension().getWidth()), 
+				(int) Math.ceil(this.shape.getDimension().getHeight()), 
 				BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2 = image.createGraphics();
-
 		this.shape.initialize(g2, this.dependencyManager.getLayeredGraph().getNodes());
+		g2.dispose();
+		
 		drawLayerBarsSvg(dimension, output);
 		
 		this.coordinateSystem = new CoordinateSystem(this.shape, this.graph.getHeight());
@@ -111,6 +113,7 @@ public class Grapher<T> {
 		output.write(("<g transform=\"translate(" + (excessWidth / 2.0) + "," + excessHeight + ")\" >").getBytes("UTF-8"));
 		
 		drawBoxesSvg(output);
+		drawArrowsSvg(output);
 		
 		output.write("</g>".getBytes("UTF-8"));
 	}
@@ -150,6 +153,21 @@ public class Grapher<T> {
 		}
 	}
 
+	private void drawArrowsSvg(OutputStream output) throws IOException {
+		for (GraphLayer layer : this.graph.getLayers()) {
+
+			if (layer.getLevelNumber() > 0) {
+				for (Vertex vertex : layer.getOrderedContents()) {
+					List<Vertex> dependencies = vertex.getNeighboursInLayer(layer.getLevelNumber()-1);
+					for (Vertex dependency : dependencies) {
+						drawArrowSvg(output, vertex, dependency);
+					}
+				}
+			}
+		}
+	}
+
+
 	private void drawArrows(Graphics2D graphics, GraphLayer layer) {
 		if (layer.getLevelNumber() > 0) {
 			for (Vertex vertex : layer.getOrderedContents()) {
@@ -161,16 +179,45 @@ public class Grapher<T> {
 		}
 	}
 
+	private void drawArrowSvg(OutputStream output, Vertex vertex, Vertex dependency) throws IOException {
+		if (!dependency.isDummy() && !vertex.isDummy()) {
+			Node<T> node = (Node<T>) ((Graph.BasicVertex) vertex).getNode();
+			Object object = ((Graph.BasicVertex) dependency).getNode().getItem();
+			float width = determineStrokeWidth(node, object);
+			
+			Arrow line = BoundsUtil.getEndPoints(getBounds(node.getItem()), getBounds(object));
+			line.setWidth(width);
+			this.arrowShape.drawArrowSvg(output, line);
+			if (((BasicVertex) vertex).isBidirectionalWith((BasicVertex) dependency)) {
+				Point2D to = getBoundsCenter(node.getItem(), 0.05 * this.shape.getWidth());
+				Point2D from = getBoundsCenter(object, 0.05 * this.shape.getWidth());
+				
+				Arrow arrow = new Arrow(Arrays.asList(from, to));
+				arrow = arrow.clipEnd(getBounds(node.getItem()));
+				arrow = arrow.clipStart(getBounds(object));
+				arrow.setWidth(width);
+				this.arrowShape.drawArrowSvg(output, arrow);
+			}
+		} else if (!vertex.isDummy() && dependency.isDummy()) {
+			this.arrowShape.drawArrowSvg(output, getArrow(dependency));
+		}
+	}
+
+	private float determineStrokeWidth(Node<T> node, Object object) {
+		int weight = determineWeight(node, object);
+		
+		float width = 1.0f;
+		if (this.maxWeight > 1) {
+			width = (float) (1 + 4 * (Math.sqrt(weight) / (Math.sqrt(this.maxWeight) - 1)));
+		}
+		return width;
+	}
+	
 	private void drawArrow(Graphics2D graphics, Vertex vertex, Vertex dependency) {
 		if (!dependency.isDummy() && !vertex.isDummy()) {
 			Node<T> node = (Node<T>) ((Graph.BasicVertex) vertex).getNode();
 			Object object = ((Graph.BasicVertex) dependency).getNode().getItem();
-			int weight = determineWeight(node, object);
-			
-			float width = 1.0f;
-			if (this.maxWeight > 1) {
-				width = (float) (1 + 4 * (Math.sqrt(weight) / (Math.sqrt(this.maxWeight) - 1)));
-			}
+			float width = determineStrokeWidth(node, object);
 			
 			Arrow line = BoundsUtil.getEndPoints(getBounds(node.getItem()), getBounds(object));
 			line.setWidth(width);
@@ -299,6 +346,10 @@ public class Grapher<T> {
 				Node<?> node = ((Graph.BasicVertex) vertex).getNode();
 				double x = this.coordinateSystem.getLeftX(vertex);
 				double y = this.coordinateSystem.getTopY(vertex);
+				this.locations.put(node.getItem(),
+						new Rectangle2D.Double(x, y,
+								this.shape.getWidth(),
+								this.shape.getHeight()));
 				Point2D.Double upperLeft = new Point2D.Double(x, y);
 				drawNodeSvg(node, upperLeft, output);
 			}
