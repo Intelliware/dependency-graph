@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
+import ca.intelliware.commons.dependency.Coupling;
 import ca.intelliware.commons.dependency.DependencyManager;
 import ca.intelliware.commons.dependency.Layer;
 import ca.intelliware.commons.dependency.Node;
@@ -45,7 +47,8 @@ class Graph implements SugiyamaGraph {
 				return false;
 			} else if (vertex instanceof BasicVertex) {
 				Object object = ((BasicVertex) vertex).node.getItem();
-				return this.node.getAfferentCouplings().contains(object) || this.node.getEfferentCouplings().contains(object);
+				return this.node.getAfferentCouplings().stream().map(c -> c.getItem()).collect(Collectors.toList()).contains(object) 
+						|| this.node.getEfferentCouplings().stream().map(c -> c.getItem()).collect(Collectors.toList()).contains(object);
 			} else {
 				return vertex.isNeighbour(this);
 			}
@@ -112,8 +115,8 @@ class Graph implements SugiyamaGraph {
 	}
 
 	private static <T> void createDummyVertices(Map<Object, Vertex> map, Node<T> node, Vertex top, Graph graph) {
-		for (Object dependency : node.getEfferentCouplings()) {
-			Vertex bottom = map.get(dependency);
+		for (Coupling<?> dependency : node.getEfferentCouplings()) {
+			Vertex bottom = map.get(dependency.getItem());
 			if (node.getLayer() - bottom.getLayer() > 1) {
 				createDummyVertices(node.getLayer(), top, bottom, graph);
 			} else if (bottom.getLayer() - node.getLayer() > 1) {
